@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 
-class MyCustomContainer extends StatelessWidget {
+class MyContainerWidget extends StatelessWidget {
   final String text;
-  const MyCustomContainer({super.key, required this.text});
+
+  const MyContainerWidget({
+    Key? key,
+    required this.text,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: Colors.blueAccent,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         text,
-        style: TextStyle(color: Colors.white, fontSize: 18),
+        style: const TextStyle(color: Colors.white, fontSize: 18),
       ),
     );
   }
