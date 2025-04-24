@@ -33,16 +33,22 @@ class _CustomScoreBoardState extends State<CustomScoreBoard> {
     super.initState();
     homeProvider = HomeProvider();
     fixtureListCubit = FixtureListCubit();
-
     // final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    context.read<FixtureListCubit>().fetchFixturesUpcomingList(0, homeProvider);
-    context.read<FixtureListCubit>().fetchFixturesLiveList(1, homeProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fixtureListCubit.fetchFixturesUpcomingList(0, homeProvider);
+      fixtureListCubit.fetchFixturesLiveList(1, homeProvider);
+      fixtureListCubit.fetchFixturesRecentList(2, homeProvider);
+    });
 
-    context.read<FixtureListCubit>().fetchFixturesRecentList(2, homeProvider);
+    // context.read<FixtureListCubit>().fetchFixturesUpcomingList(0, homeProvider);
+    // context.read<FixtureListCubit>().fetchFixturesLiveList(1, homeProvider);
+
+    // context.read<FixtureListCubit>().fetchFixturesRecentList(2, homeProvider);
     _timer = Timer.periodic(const Duration(seconds: 15), (timer) {
 
       // context.read<FixtureListCubit>().fetchFixturesUpcomingList(0, homeProvider);
-      context.read<FixtureListCubit>().fetchFixturesLiveList(1, homeProvider);
+      // context.read<FixtureListCubit>().fetchFixturesLiveList(1, homeProvider);
+      fixtureListCubit.fetchFixturesLiveList(1, homeProvider);
 
       // context.read<FixtureListCubit>().fetchFixturesRecentList(2, homeProvider);
     });
