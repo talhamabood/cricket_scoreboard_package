@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text("Package Demo")),
         body: const Center(
-          child: MyContainerWidget(text: "Hello from Package!"),
+          child: CustomScoreBoard(),
         ),
       ),
     );
