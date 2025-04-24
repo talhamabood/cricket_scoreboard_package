@@ -72,12 +72,13 @@ class _CustomScoreBoardState extends State<CustomScoreBoard> {
     final List<FixturesListModels> recentFixtureList =
     homeProvider.recentFixtureList.reversed.take(3).toList();
 
-    print(totalList.length);
+    print('totalList before=======================${totalList.length}');
     totalList = [
       ...liveFixtureList,
       ...upcomingFixtureList,
       ...recentFixtureList,
     ];
+    print('totalList after=======================${totalList.length}');
 
     return BlocProvider.value(
       value: fixtureListCubit,
