@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cricket_scoreboard/src/resources/color_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import 'custom_home_card.dart';
@@ -60,58 +61,68 @@ class _CustomScoreBoardState extends State<CustomScoreBoard> {
       ...recentFixtureList,
     ];
 
-    return totalList.isNotEmpty
-        ? CarouselSlider.builder(
-      itemCount: totalList.length,
-      itemBuilder: (context, index, realIndex) {
-        final FixturesListModels fixture =
-        totalList[index];
-
-        // Safety checks for team and innings data
-        final Team? teamA = fixture.teams.isNotEmpty
-            ? fixture.teams[0]
-            : null;
-        final Team? teamB = fixture.teams.isNotEmpty
-            ? fixture.teams[1]
-            : null;
-
-        final List<Inning>? teamAInnings =
-        teamA!.innings.isNotEmpty
-            ? teamA.innings.reversed.toList()
-            : null;
-        final List<Inning>? teamBInnings =
-        teamB!.innings.isNotEmpty
-            ? teamB.innings.reversed.toList()
-            : null;
-        return CustomHomeCard(
-          teamA: teamA,
-          teamB: teamB,
-          teamAInnings: teamAInnings,
-          teamBInnings: teamBInnings,
-          fixture: fixture,
-          length: totalList.length,
-        );
-      },
-      options: CarouselOptions(
-          height: 250, // Adjust the height based on your design
-          viewportFraction:
-          1, // Adjust the fraction of the viewport shown
-          enableInfiniteScroll: true,
-          autoPlay: true,
-          autoPlayInterval:
-          const Duration(seconds: 5),
-          enlargeStrategy:
-          CenterPageEnlargeStrategy.zoom,
-          enlargeCenterPage: true,
-          onPageChanged:
-              (value, carouselPageChangedReason) {
-            homeProvider.getCurrentIndexValue(value);
-          }),
-    )
-        : Center(
-        child: CircularProgressIndicator(
-          color: ColorManager.primary,
-        ));
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        BlocProvider(create: (_) => FixtureListCubit()), // if needed
+      ],
+      child: Column(
+        children: [
+          totalList.isNotEmpty
+              ? CarouselSlider.builder(
+            itemCount: totalList.length,
+            itemBuilder: (context, index, realIndex) {
+              final FixturesListModels fixture =
+              totalList[index];
+          
+              // Safety checks for team and innings data
+              final Team? teamA = fixture.teams.isNotEmpty
+                  ? fixture.teams[0]
+                  : null;
+              final Team? teamB = fixture.teams.isNotEmpty
+                  ? fixture.teams[1]
+                  : null;
+          
+              final List<Inning>? teamAInnings =
+              teamA!.innings.isNotEmpty
+                  ? teamA.innings.reversed.toList()
+                  : null;
+              final List<Inning>? teamBInnings =
+              teamB!.innings.isNotEmpty
+                  ? teamB.innings.reversed.toList()
+                  : null;
+              return CustomHomeCard(
+                teamA: teamA,
+                teamB: teamB,
+                teamAInnings: teamAInnings,
+                teamBInnings: teamBInnings,
+                fixture: fixture,
+                length: totalList.length,
+              );
+            },
+            options: CarouselOptions(
+                height: 250, // Adjust the height based on your design
+                viewportFraction:
+                1, // Adjust the fraction of the viewport shown
+                enableInfiniteScroll: true,
+                autoPlay: true,
+                autoPlayInterval:
+                const Duration(seconds: 5),
+                enlargeStrategy:
+                CenterPageEnlargeStrategy.zoom,
+                enlargeCenterPage: true,
+                onPageChanged:
+                    (value, carouselPageChangedReason) {
+                  homeProvider.getCurrentIndexValue(value);
+                }),
+          )
+              : Center(
+              child: CircularProgressIndicator(
+                color: ColorManager.primary,
+              )),
+        ],
+      ),
+    );
     // return Container(
     //   padding: const EdgeInsets.all(16),
     //   margin: const EdgeInsets.all(8),
