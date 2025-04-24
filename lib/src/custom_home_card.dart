@@ -13,6 +13,7 @@ class CustomHomeCard extends StatelessWidget {
   final List<Inning>? teamBInnings;
   final FixturesListModels fixture;
   final int length;
+  final HomeProvider homeProvider;
   const CustomHomeCard({
     super.key,
     this.teamA,
@@ -20,12 +21,12 @@ class CustomHomeCard extends StatelessWidget {
     this.teamAInnings,
     this.teamBInnings,
     required this.fixture,
-    required this.length,
+    required this.length, required this.homeProvider,
   });
 
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context);
+    // final homeProvider = Provider.of<HomeProvider>(context);
 
     return InkWell(
       onTap: () {

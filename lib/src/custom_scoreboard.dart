@@ -24,12 +24,17 @@ class CustomScoreBoard extends StatefulWidget {
 class _CustomScoreBoardState extends State<CustomScoreBoard> {
   List<FixturesListModels> totalList = [];
   Timer? _timer;
+  late HomeProvider homeProvider;
+  late FixtureListCubit fixtureListCubit;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    homeProvider = HomeProvider();
+    fixtureListCubit = FixtureListCubit();
+
+    // final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     context.read<FixtureListCubit>().fetchFixturesUpcomingList(0, homeProvider);
     context.read<FixtureListCubit>().fetchFixturesLiveList(1, homeProvider);
 
@@ -42,10 +47,17 @@ class _CustomScoreBoardState extends State<CustomScoreBoard> {
       // context.read<FixtureListCubit>().fetchFixturesRecentList(2, homeProvider);
     });
   }
-
+  @override
+  void dispose() {
+    homeProvider.dispose(); // important to clean up
+    if (_timer != null) {
+      _timer!.cancel();
+    }
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    final homeProvider = Provider.of<HomeProvider>(context);
+    // final homeProvider = Provider.of<HomeProvider>(context);
 
     final List<FixturesListModels> liveFixtureList =
     homeProvider.liveFixtureList.reversed.take(3).toList();
@@ -61,66 +73,67 @@ class _CustomScoreBoardState extends State<CustomScoreBoard> {
       ...recentFixtureList,
     ];
 
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => HomeProvider()),
-        BlocProvider(create: (_) => FixtureListCubit()), // if needed
-      ],
-      child: Column(
-        children: [
-          totalList.isNotEmpty
-              ? CarouselSlider.builder(
-            itemCount: totalList.length,
-            itemBuilder: (context, index, realIndex) {
-              final FixturesListModels fixture =
-              totalList[index];
-          
-              // Safety checks for team and innings data
-              final Team? teamA = fixture.teams.isNotEmpty
-                  ? fixture.teams[0]
-                  : null;
-              final Team? teamB = fixture.teams.isNotEmpty
-                  ? fixture.teams[1]
-                  : null;
-          
-              final List<Inning>? teamAInnings =
-              teamA!.innings.isNotEmpty
-                  ? teamA.innings.reversed.toList()
-                  : null;
-              final List<Inning>? teamBInnings =
-              teamB!.innings.isNotEmpty
-                  ? teamB.innings.reversed.toList()
-                  : null;
-              return CustomHomeCard(
-                teamA: teamA,
-                teamB: teamB,
-                teamAInnings: teamAInnings,
-                teamBInnings: teamBInnings,
-                fixture: fixture,
-                length: totalList.length,
-              );
-            },
-            options: CarouselOptions(
-                height: 250, // Adjust the height based on your design
-                viewportFraction:
-                1, // Adjust the fraction of the viewport shown
-                enableInfiniteScroll: true,
-                autoPlay: true,
-                autoPlayInterval:
-                const Duration(seconds: 5),
-                enlargeStrategy:
-                CenterPageEnlargeStrategy.zoom,
-                enlargeCenterPage: true,
-                onPageChanged:
-                    (value, carouselPageChangedReason) {
-                  homeProvider.getCurrentIndexValue(value);
-                }),
-          )
-              : Center(
-              child: CircularProgressIndicator(
-                color: ColorManager.primary,
-              )),
-        ],
+    return BlocProvider.value(
+      value: fixtureListCubit,
+      child: ChangeNotifierProvider.value(
+        value: homeProvider,
+        child: Column(
+          children: [
+            totalList.isNotEmpty
+                ? CarouselSlider.builder(
+              itemCount: totalList.length,
+              itemBuilder: (context, index, realIndex) {
+                final FixturesListModels fixture =
+                totalList[index];
+            
+                // Safety checks for team and innings data
+                final Team? teamA = fixture.teams.isNotEmpty
+                    ? fixture.teams[0]
+                    : null;
+                final Team? teamB = fixture.teams.isNotEmpty
+                    ? fixture.teams[1]
+                    : null;
+            
+                final List<Inning>? teamAInnings =
+                teamA!.innings.isNotEmpty
+                    ? teamA.innings.reversed.toList()
+                    : null;
+                final List<Inning>? teamBInnings =
+                teamB!.innings.isNotEmpty
+                    ? teamB.innings.reversed.toList()
+                    : null;
+                return CustomHomeCard(
+                  teamA: teamA,
+                  teamB: teamB,
+                  teamAInnings: teamAInnings,
+                  teamBInnings: teamBInnings,
+                  fixture: fixture,
+                  length: totalList.length,
+                  homeProvider: homeProvider,
+                );
+              },
+              options: CarouselOptions(
+                  height: 250, // Adjust the height based on your design
+                  viewportFraction:
+                  1, // Adjust the fraction of the viewport shown
+                  enableInfiniteScroll: true,
+                  autoPlay: true,
+                  autoPlayInterval:
+                  const Duration(seconds: 5),
+                  enlargeStrategy:
+                  CenterPageEnlargeStrategy.zoom,
+                  enlargeCenterPage: true,
+                  onPageChanged:
+                      (value, carouselPageChangedReason) {
+                    homeProvider.getCurrentIndexValue(value);
+                  }),
+            )
+                : Center(
+                child: CircularProgressIndicator(
+                  color: ColorManager.primary,
+                )),
+          ],
+        ),
       ),
     );
     // return Container(
